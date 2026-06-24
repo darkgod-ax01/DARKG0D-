@@ -1,0 +1,26 @@
+workflows:
+  android-debug:
+    name: Dark Browser APK
+    max_build_duration: 60
+    instance_type: linux_x2
+    environment:
+      java: 17
+    scripts:
+      - name: Extract ZIP
+        script: |
+          unzip dark-browser-codemagic.zip
+          cp -r dark-browser/* .
+      - name: Set Android SDK location
+        script: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/local.properties"
+      - name: Create .env file
+        script: |
+          cp .env.example .env
+      - name: Make gradlew executable
+        script: |
+          chmod +x gradlew
+      - name: Build Debug APK
+        script: |
+          ./gradlew assembleDebug --stacktrace
+    artifacts:
+      - app/build/outputs/apk/debug/app-debug.apk
