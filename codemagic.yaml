@@ -1,25 +1,21 @@
-workflows:
-  android-debug:
-    name: Dark Browser APK
-    max_build_duration: 60
-    environment:
-      java: 17
-    scripts:
-      - name: Extract ZIP
-        script: |
-          unzip dark-browser-codemagic.zip
-          cp -r dark-browser/* .
-      - name: Set Android SDK location
-        script: |
-          echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/local.properties"
-      - name: Create .env file
-        script: |
-          cp .env.example .env
-      - name: Make gradlew executable
-        script: |
-          chmod +x gradlew
-      - name: Build Debug APK
-        script: |
-          ./gradlew assembleDebug --stacktrace
-    artifacts:
-      - app/build/outputs/apk/debug/app-debug.apk
+name: Build APK
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - run: unzip dark-browser-codemagic.zip
+      - run: cp dark-browser/.env.example dark-browser/.env
+      - run: chmod +x dark-browser/gradlew
+      - run: cd dark-browser && ./gradlew assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: APK
+          path: dark-browser/app/build/outputs/apk/debug/app-debug.apk
